@@ -1,0 +1,126 @@
+# ===========================================
+# 现期费率套利系统 - 策略配置文件
+# ===========================================
+# 复制此文件为 config.yaml 并根据需要修改
+
+# 交易所配置
+exchange:
+  name: binance
+  testnet: false  # 开发阶段使用测试网
+  
+  # API 限频配置
+  rateLimit:
+    maxRequestsPerMinute: 1200   # 每分钟最大请求数
+    maxOrdersPerSecond: 10       # 每秒最大下单数
+    burstLimit: 50               # 突发请求上限
+    retryDelay: 1000             # 触发限频后等待时间(ms)
+
+# 策略参数
+strategy:
+  # 市场扫描配置
+  scanner:
+    minAnnualizedReturn: 0.30    # 最小年化收益 30%（统一标准）
+    min24hVolume: 1000000        # 最小日成交量 $1M
+    maxSpreadPct: 0.005          # 最大价差 0.5%
+    stabilityWindowHours: 72     # 费率稳定性检查窗口 72 小时
+    minPositiveRatio: 0.8        # 费率为正的最小比例 80%
+    scanIntervalSeconds: 600     # 扫描间隔（秒），默认 10 分钟
+  
+  # 信号配置
+  signals:
+    openAnnualizedThreshold: 0.30   # 开仓年化收益阈值 30%
+    closeAnnualizedThreshold: 0.10  # 平仓年化收益阈值 10%
+    cooldownHours: 24               # 冷却期 24 小时
+    
+    # 结算时间窗口限制
+    settlementWindow:
+      blackoutBeforeMinutes: 5   # 结算前 5 分钟禁止开仓
+      blackoutAfterMinutes: 2    # 结算后 2 分钟禁止开仓
+  
+  # 风险控制
+  risk:
+    # 仓位管理
+    maxPositionPct: 0.15         # 单个套利组合最大比例 15%
+    maxTotalExposurePct: 0.70    # 总仓位最大比例 70%
+    maxPositions: 5              # 最大套利组合数
+    minPositionValue: 100        # 最小持仓价值 $100
+    
+    # 止损止盈
+    spreadStopLossPct: 0.008     # 价差止损 0.8%
+    combinedStopLossPct: 0.02    # 综合止损 2%
+    takeProfitFundingPct: 0.03   # 费率累计止盈 3%
+    maxHoldingDays: 14           # 最长持仓 14 天
+    
+    # 账户级别风控
+    maxDrawdownPct: 0.10         # 账户最大回撤 10%
+    emergencyStopLoss: 0.15      # 紧急止损线 15%（触发后暂停所有交易）
+    
+    # 合约保证金
+    targetLeverage: 2            # 目标杠杆
+    maxLeverage: 3               # 最大允许杠杆
+    marginCallThreshold: 0.15    # 保证金告警阈值 15%
+  
+  # 订单执行
+  execution:
+    legTimeoutSeconds: 10        # 单腿超时 10 秒
+    totalTimeoutSeconds: 30      # 整体超时 30 秒
+    maxSlippagePct: 0.001        # 最大滑点 0.1%
+    quantityTolerancePct: 0.02   # 双边数量偏差容忍度 2%
+    useLimitOrders: true         # 使用限价单
+    
+    # 并发执行
+    maxConcurrentOrders: 2       # 最多同时执行 2 个开仓
+    orderInterval: 1000          # 订单间隔 1 秒
+
+# 资金划转配置
+transfer:
+  autoTransfer: true             # 自动划转资金
+  minTransferAmount: 10          # 最小划转金额 $10
+  reserveInSpot: 100             # 现货账户保留金额 $100
+  reserveInFutures: 100          # 合约账户保留金额 $100
+
+# 回测配置
+backtest:
+  # 默认回测参数
+  defaultPeriodDays: 30          # 默认回测周期 30 天
+  initialCapital: 10000          # 初始资金 $10,000
+  
+  # 手续费配置（默认 USDT 支付，不使用 BNB 抵扣）
+  commission:
+    spotMaker: 0.001             # 现货 Maker 0.1%
+    spotTaker: 0.001             # 现货 Taker 0.1%
+    futuresMaker: 0.0002         # 合约 Maker 0.02%
+    futuresTaker: 0.0004         # 合约 Taker 0.04%
+    useBnbDiscount: false        # 不使用 BNB 抵扣
+  
+  # 滑点模型
+  slippage:
+    model: VOLUME_BASED          # FIXED | VOLUME_BASED | ORDERBOOK_BASED
+    fixedPct: 0.0005             # 固定滑点 0.05%（FIXED 模式）
+    volumeBased:
+      baseSlippage: 0.0002       # 基础滑点 0.02%
+      volumeMultiplier: 0.00001  # 每 $10k 增加 0.01%
+
+# 监控配置
+monitoring:
+  logLevel: info                 # 日志级别
+  metricsEnabled: true           # 是否启用指标收集
+  
+  # 告警配置
+  alerts:
+    enabled: true
+    # 告警级别: CRITICAL > ERROR > WARNING > INFO
+    levels:
+      critical: true             # 账户异常、API 认证失败
+      error: true                # 订单执行失败、持仓异常
+      warning: true              # 费率下降、价差扩大
+      info: false                # 开仓/平仓成功、费率结算
+
+# API 服务配置
+api:
+  enabled: true
+  port: 3000
+  host: '0.0.0.0'
+  cors:
+    enabled: true
+    origin: '*'

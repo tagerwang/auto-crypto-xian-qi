@@ -27,6 +27,9 @@ out/
 .env.local
 .env.*.local
 
+# User config (use config.example.yaml as template)
+config.yaml
+
 # Logs
 logs/
 *.log
