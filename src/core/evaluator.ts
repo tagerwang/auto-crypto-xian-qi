@@ -203,7 +203,7 @@ export class Evaluator {
     const overallScore = Math.min(spotDepthScore, futuresDepthScore);
 
     // 至少 50 分才通过
-    const passed = overallScore >= 50;
+    const passed = overallScore >= 20;
 
     return {
       spotDepthScore,

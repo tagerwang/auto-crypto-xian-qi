@@ -31,7 +31,7 @@ export const scannerSchema = z.object({
   min24hVolume: z.number().min(0).default(1000000),
   maxSpreadPct: z.number().min(0).max(0.1).default(0.005),
   stabilityWindowHours: z.number().min(1).max(168).default(72),
-  minPositiveRatio: z.number().min(0).max(1).default(0.8),
+  minPositiveRatio: z.number().min(0).max(1).default(0.6),
   scanIntervalSeconds: z.number().min(60).max(3600).default(600),
 });
 

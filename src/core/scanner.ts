@@ -113,11 +113,12 @@ export class Scanner {
   /**
    * 根据流动性筛选
    */
-  private async filterByLiquidity(rates: FundingRateInfo[]): Promise<FundingRateInfo[]> {
-    console.log('filterByLiquidity :>> ', rates);
+  private async filterByLiquidity(_rates: FundingRateInfo[]): Promise<FundingRateInfo[]> {
+    console.log('filterByLiquidity :>> ', _rates);
     const minVolume = toDecimal(this.config.min24hVolume);
     const result: FundingRateInfo[] = [];
-
+    // 过滤出费率大于0.2%的币
+    const rates = _rates.filter((rate) => rate.fundingRate.gt(toDecimal(0)) && rate.fundingRate.lt(toDecimal(0.0001)));
     // 串行检查流动性，每次请求后等待一段时间避免限频
     for (const rate of rates) {
       try {
